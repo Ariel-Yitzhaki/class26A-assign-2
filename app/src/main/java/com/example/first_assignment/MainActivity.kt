@@ -109,11 +109,10 @@ class MainActivity : AppCompatActivity() {
             )
         )
         lives = LivesController(
-            findViewById(R.id.heart1_1),
+            findViewById(R.id.heart1_3),
             findViewById(R.id.heart1_2),
-            findViewById(R.id.heart1_3)
+            findViewById(R.id.heart1_1)
         )
-
     }
 
     private fun setupButtons() {

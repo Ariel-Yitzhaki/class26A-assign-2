@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.first_assignment"
+    namespace = "com.example.racing_assignment"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.first_assignment"
+        applicationId = "com.example.racing_assignment"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

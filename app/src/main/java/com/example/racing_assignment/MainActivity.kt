@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         setupButtons()
 
         handler.post(gameLoop)
+
+        // add finish()
     }
     // Animates the columns
     private fun runColumn() {

@@ -5,40 +5,54 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.core.content.edit
+import com.bumptech.glide.Glide
+import com.example.racing_assignment.databinding.FragmentRecordsBinding
 
 class RecordsFragment : Fragment() {
 
-    val recordIds = listOf(
-        R.id.record1, R.id.record2, R.id.record3, R.id.record4, R.id.record5,
-        R.id.record6, R.id.record7, R.id.record8, R.id.record9, R.id.record10
-    )
+    private var _binding: FragmentRecordsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_records, container, false)
+    ): View {
+        _binding = FragmentRecordsBinding.inflate(inflater, container, false)
+
+        Glide.with(this)
+            .load(R.drawable.leaderboard_background)
+            .centerCrop()
+            .into(binding.leaderboardBackground)
 
         val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
 
-        recordIds.forEachIndexed { index, id ->
+        val records = listOf(
+            binding.record1, binding.record2, binding.record3, binding.record4, binding.record5,
+            binding.record6, binding.record7, binding.record8, binding.record9, binding.record10
+        )
+
+        records.forEachIndexed { index, textView ->
             val score = prefs.getInt("record${index + 1}", 0)
-            view.findViewById<TextView>(id).setOnClickListener {
+            textView.setOnClickListener {
                 // TODO: handle record click
             }
         }
 
-        view.findViewById<ImageButton>(R.id.return_menu).setOnClickListener {
+        binding.returnMenu.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        return view
+        return binding.root
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     fun saveScore(position: Int, score: Int) {
         val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
         prefs.edit { putInt("record$position", score) }

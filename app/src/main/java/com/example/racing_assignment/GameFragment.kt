@@ -20,6 +20,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import com.bumptech.glide.Glide
 
 class GameFragment : Fragment() {
     private lateinit var columns: Array<Array<ImageView>>
@@ -32,6 +33,7 @@ class GameFragment : Fragment() {
     private var liveCounter = 3
     private val bombsAtBottom = mutableSetOf<Int>()
     private var useButtons = true
+    private var gameEnded = false
 
     // Sensor properties
     private var sensorManager: SensorManager? = null
@@ -71,6 +73,10 @@ class GameFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
+
+        Glide.with(this)
+            .load(R.drawable.background_road)
+            .into(view.findViewById(R.id.background_road))
 
         useButtons = arguments?.getBoolean("useButtons", true) ?: true
 
@@ -207,6 +213,7 @@ class GameFragment : Fragment() {
 
     @Suppress("DEPRECATION")
     private fun vibrate() {
+        if (!isAdded) return
         val context = requireContext()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -222,6 +229,7 @@ class GameFragment : Fragment() {
     }
 
     private fun checkCollision(column: Int) {
+        if (gameEnded || !isAdded) return
         if (column == currentLane) {
             lives.removeLives(liveCounter - 1)
             liveCounter--
@@ -237,6 +245,9 @@ class GameFragment : Fragment() {
 
 
     private fun endGame() {
+        if (gameEnded) return
+        gameEnded = true
+        handler.removeCallbacksAndMessages(null)
         parentFragmentManager.popBackStack()
     }
 

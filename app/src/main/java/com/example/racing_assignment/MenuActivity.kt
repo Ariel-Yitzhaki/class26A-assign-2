@@ -1,29 +1,27 @@
 package com.example.racing_assignment
 
 import android.os.Bundle
-import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.example.racing_assignment.databinding.ActivityMenuBinding
 
 class MenuActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMenuBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_menu)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.menu)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        binding = ActivityMenuBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val playButtons = findViewById<Button>(R.id.buttons)
-        val playSensors = findViewById<Button>(R.id.sensors)
-        val playRecords = findViewById<Button>(R.id.records)
+        Glide.with(this)
+            .load(R.drawable.menu_background)
+            .centerCrop()
+            .into(binding.menuBackground)
 
-        playButtons.setOnClickListener {
+        binding.buttons.setOnClickListener {
             val fragment = GameFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("useButtons", true)
@@ -35,7 +33,7 @@ class MenuActivity : AppCompatActivity() {
                 .commit()
         }
 
-        playSensors.setOnClickListener {
+        binding.sensors.setOnClickListener {
             val fragment = GameFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("useButtons", false)
@@ -47,7 +45,7 @@ class MenuActivity : AppCompatActivity() {
                 .commit()
         }
 
-        playRecords.setOnClickListener {
+        binding.records.setOnClickListener {
             val fragment = RecordsFragment()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)

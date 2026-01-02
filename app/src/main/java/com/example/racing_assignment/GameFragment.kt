@@ -14,8 +14,9 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.widget.Button
+import android.widget.RelativeLayout
+import android.widget.TextView
 import android.widget.Toast
-import kotlin.arrayOf
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -23,48 +24,58 @@ import android.hardware.SensorManager
 import com.bumptech.glide.Glide
 
 class GameFragment : Fragment() {
-    private lateinit var columns: Array<Array<ImageView>>
+
     private val handler = Handler(Looper.getMainLooper())
-    private val animatingColumns = mutableSetOf<Int>()
     private var currentLane = 2
-    private lateinit var carController: CarController
     private var canMove = true
     private lateinit var lives: LivesController
     private var liveCounter = 3
-    private val bombsAtBottom = mutableSetOf<Int>()
     private var useButtons = true
     private var gameEnded = false
+    private var score = 0
+    private lateinit var gameContainer: RelativeLayout
+    private lateinit var raceCar: ImageView
+    private lateinit var scoreText: TextView
+
+    private var screenWidth = 0
+    private var laneWidth = 0
+    private val laneCount = 5
 
     // Sensor properties
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
-            val x = event.values[0] // Tilt left/right (-10 to 10)
+            if (gameEnded) return
+            val x = event.values[0]
 
             when {
                 x < -3 && canMove && currentLane < 4 -> {
                     canMove = false
-                    carController.moveCar(currentLane, currentLane + 1)
                     currentLane++
-                    if (bombsAtBottom.contains(currentLane)) {
-                        checkCollision(currentLane)
-                    }
+                    moveCarToLane(currentLane)
                     handler.postDelayed({ canMove = true }, 300)
                 }
                 x > 3 && canMove && currentLane > 0 -> {
                     canMove = false
-                    carController.moveCar(currentLane, currentLane - 1)
                     currentLane--
-                    if (bombsAtBottom.contains(currentLane)) {
-                        checkCollision(currentLane)
-                    }
+                    moveCarToLane(currentLane)
                     handler.postDelayed({ canMove = true }, 300)
                 }
             }
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
+    private val scoreRunnable = object : Runnable {
+        override fun run() {
+            if (!gameEnded) {
+                score++
+                scoreText.text = score.toString()
+                handler.postDelayed(this, 500)
+            }
+        }
     }
 
     override fun onCreateView(
@@ -81,16 +92,23 @@ class GameFragment : Fragment() {
         useButtons = arguments?.getBoolean("useButtons", true) ?: true
 
         initializeViews(view)
-        if (useButtons) {
-            setupButtons(view)
-        } else {
-            view.findViewById<Button>(R.id.leftArrow).visibility = View.GONE
-            view.findViewById<Button>(R.id.rightArrow).visibility = View.GONE
-            setupSensors()
+
+        view.post {
+            screenWidth = view.width
+            laneWidth = screenWidth / laneCount
+            moveCarToLane(currentLane)
+
+            if (useButtons) {
+                setupButtons(view)
+            } else {
+                view.findViewById<Button>(R.id.leftArrow).visibility = View.GONE
+                view.findViewById<Button>(R.id.rightArrow).visibility = View.GONE
+                setupSensors()
+            }
+
+            handler.post(gameLoop)
+            handler.post(scoreRunnable)
         }
-
-
-        handler.post(gameLoop)
 
         return view
     }
@@ -113,66 +131,27 @@ class GameFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacksAndMessages(null) // Stop the game loop
+        handler.removeCallbacksAndMessages(null)
     }
 
     private fun initializeViews(view: View) {
-        carController = CarController(
-            view.findViewById(R.id.raceCar1_1),
-            view.findViewById(R.id.raceCar1_2),
-            view.findViewById(R.id.raceCar1_3),
-            view.findViewById(R.id.raceCar1_4),
-            view.findViewById(R.id.raceCar1_5)
-        )
-
-        columns = arrayOf(
-            arrayOf(
-                view.findViewById(R.id.bomb1_1),
-                view.findViewById(R.id.bomb2_1),
-                view.findViewById(R.id.bomb3_1),
-                view.findViewById(R.id.bomb4_1),
-                view.findViewById(R.id.bomb5_1),
-                view.findViewById(R.id.bomb6_1)
-            ),
-            arrayOf(
-                view.findViewById(R.id.bomb1_2),
-                view.findViewById(R.id.bomb2_2),
-                view.findViewById(R.id.bomb3_2),
-                view.findViewById(R.id.bomb4_2),
-                view.findViewById(R.id.bomb5_2),
-                view.findViewById(R.id.bomb6_2)
-            ),
-            arrayOf(
-                view.findViewById(R.id.bomb1_3),
-                view.findViewById(R.id.bomb2_3),
-                view.findViewById(R.id.bomb3_3),
-                view.findViewById(R.id.bomb4_3),
-                view.findViewById(R.id.bomb5_3),
-                view.findViewById(R.id.bomb6_3)
-            ),
-            arrayOf(
-                view.findViewById(R.id.bomb1_4),
-                view.findViewById(R.id.bomb2_4),
-                view.findViewById(R.id.bomb3_4),
-                view.findViewById(R.id.bomb4_4),
-                view.findViewById(R.id.bomb5_4),
-                view.findViewById(R.id.bomb6_4)
-            ),
-            arrayOf(
-                view.findViewById(R.id.bomb1_5),
-                view.findViewById(R.id.bomb2_5),
-                view.findViewById(R.id.bomb3_5),
-                view.findViewById(R.id.bomb4_5),
-                view.findViewById(R.id.bomb5_5),
-                view.findViewById(R.id.bomb6_5)
-            )
-        )
+        gameContainer = view.findViewById(R.id.gameContainer)
+        raceCar = view.findViewById(R.id.raceCar)
+        scoreText = view.findViewById(R.id.scoreText)
 
         lives = LivesController(
             view.findViewById(R.id.heart1_3),
             view.findViewById(R.id.heart1_2),
             view.findViewById(R.id.heart1_1)
         )
+    }
+
+    private fun moveCarToLane(lane: Int) {
+        val targetX = (lane * laneWidth) + (laneWidth / 2) - (raceCar.width / 2)
+        raceCar.animate()
+            .x(targetX.toFloat())
+            .setDuration(100)
+            .start()
     }
 
     private fun setupButtons(view: View) {
@@ -182,12 +161,8 @@ class GameFragment : Fragment() {
         buttonLeft.setOnClickListener {
             if (canMove && currentLane > 0) {
                 canMove = false
-                carController.moveCar(currentLane, currentLane - 1)
                 currentLane--
-
-                if (bombsAtBottom.contains(currentLane)) {
-                    checkCollision(currentLane)
-                }
+                moveCarToLane(currentLane)
                 handler.postDelayed({ canMove = true }, 100)
             }
         }
@@ -195,12 +170,8 @@ class GameFragment : Fragment() {
         buttonRight.setOnClickListener {
             if (canMove && currentLane < 4) {
                 canMove = false
-                carController.moveCar(currentLane, currentLane + 1)
                 currentLane++
-
-                if (bombsAtBottom.contains(currentLane)) {
-                    checkCollision(currentLane)
-                }
+                moveCarToLane(currentLane)
                 handler.postDelayed({ canMove = true }, 100)
             }
         }
@@ -209,6 +180,83 @@ class GameFragment : Fragment() {
     private fun setupSensors() {
         sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    }
+
+    private val gameLoop = object : Runnable {
+        override fun run() {
+            if (!gameEnded) {
+                spawnObject()
+                handler.postDelayed(this, 1500)
+            }
+        }
+    }
+
+    private fun spawnObject() {
+        val lane = (0 until laneCount).random()
+        val isCoin = (0..10).random() > 7  // 30% chance for coin
+
+        val imageView = ImageView(requireContext()).apply {
+            setImageResource(if (isCoin) R.drawable.ic_coin else R.drawable.ic_bomb)
+            layoutParams = RelativeLayout.LayoutParams(
+                if (isCoin) 80 else 100,
+                if (isCoin) 80 else 100
+            )
+        }
+
+        gameContainer.addView(imageView)
+
+        val startX = (lane * laneWidth) + (laneWidth / 2) - (if (isCoin) 40 else 50)
+        imageView.x = startX.toFloat()
+        imageView.y = 0f
+
+        val endY = gameContainer.height.toFloat()
+        val carY = raceCar.y
+
+        imageView.animate()
+            .y(endY)
+            .setDuration(3000)
+            .setUpdateListener { animation ->
+                if (gameEnded) {
+                    animation.cancel()
+                    return@setUpdateListener
+                }
+
+                // Check collision when object reaches car level
+                val objectY = imageView.y
+                val objectLane = ((imageView.x + (if (isCoin) 40 else 50)) / laneWidth).toInt()
+
+                if (objectY >= carY - 60 && objectY <= carY + 60 && objectLane == currentLane) {
+                    if (isCoin) {
+                        score += 10
+                        scoreText.text = score.toString()
+                        gameContainer.removeView(imageView)
+                        animation.cancel()
+                    } else {
+                        handleCollision()
+                        gameContainer.removeView(imageView)
+                        animation.cancel()
+                    }
+                }
+            }
+            .withEndAction {
+                gameContainer.removeView(imageView)
+            }
+            .start()
+    }
+
+    private fun handleCollision() {
+        if (gameEnded || !isAdded || liveCounter <= 0) return
+
+        liveCounter--
+        lives.removeLives(liveCounter)
+        vibrate()
+
+        if (liveCounter == 0) {
+            Toast.makeText(requireContext(), "Game Over", Toast.LENGTH_SHORT).show()
+            handler.postDelayed({ endGame() }, 1000)
+        } else {
+            Toast.makeText(requireContext(), "Watch Out!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -228,59 +276,30 @@ class GameFragment : Fragment() {
         }
     }
 
-    private fun checkCollision(column: Int) {
-        if (gameEnded || !isAdded) return
-        if (column == currentLane) {
-            lives.removeLives(liveCounter - 1)
-            liveCounter--
-            vibrate()
-            if (liveCounter == 0) {
-                Toast.makeText(requireContext(), "Game Over", Toast.LENGTH_SHORT).show()
-                endGame()
-            } else {
-                Toast.makeText(requireContext(), "Watch Out!", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-
     private fun endGame() {
         if (gameEnded) return
         gameEnded = true
         handler.removeCallbacksAndMessages(null)
-        parentFragmentManager.popBackStack()
-    }
-
-    private val gameLoop = object : Runnable {
-        override fun run() {
-            runColumn()
-            handler.postDelayed(this, 1600)
+        if (isAdded) {
+            saveScoreIfHighScore()
+            parentFragmentManager.popBackStack()
         }
     }
 
-    private fun runColumn() {
-        val availableColumns = columns.indices.filter { it !in animatingColumns }
-        if (availableColumns.isEmpty()) return
+    private fun saveScoreIfHighScore() {
+        if (!isAdded) return
+        val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
 
-        val randomColumn = availableColumns.random()
-        animatingColumns.add(randomColumn)
-        val selectedColumn = columns[randomColumn]
-
-        val animator = ImageAnimator(
-            selectedColumn[0],
-            selectedColumn[1],
-            selectedColumn[2],
-            selectedColumn[3],
-            selectedColumn[4],
-            selectedColumn[5]
-        ) {
-            bombsAtBottom.add(randomColumn)
-            checkCollision(randomColumn)
-            handler.postDelayed({
-                bombsAtBottom.remove(randomColumn)
-            }, 400)
+        for (i in 1..10) {
+            val existingScore = prefs.getInt("record$i", 0)
+            if (score > existingScore) {
+                for (j in 10 downTo i + 1) {
+                    val scoreToMove = prefs.getInt("record${j - 1}", 0)
+                    prefs.edit().putInt("record$j", scoreToMove).apply()
+                }
+                prefs.edit().putInt("record$i", score).apply()
+                break
+            }
         }
-        animator.start()
-        handler.postDelayed({ animatingColumns.remove(randomColumn) }, 3200)
     }
 }

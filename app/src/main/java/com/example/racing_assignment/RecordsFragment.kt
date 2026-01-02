@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.core.content.edit
 import com.bumptech.glide.Glide
 import com.example.racing_assignment.databinding.FragmentRecordsBinding
 
@@ -24,7 +23,6 @@ class RecordsFragment : Fragment() {
 
         Glide.with(this)
             .load(R.drawable.leaderboard_background)
-            .centerCrop()
             .into(binding.leaderboardBackground)
 
         val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
@@ -36,6 +34,12 @@ class RecordsFragment : Fragment() {
 
         records.forEachIndexed { index, textView ->
             val score = prefs.getInt("record${index + 1}", 0)
+            if (score > 0) {
+                textView.text = "$score"
+                textView.visibility = View.VISIBLE
+            } else {
+                textView.visibility = View.GONE
+            }
             textView.setOnClickListener {
                 // TODO: handle record click
             }
@@ -51,10 +55,5 @@ class RecordsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    fun saveScore(position: Int, score: Int) {
-        val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
-        prefs.edit { putInt("record$position", score) }
     }
 }

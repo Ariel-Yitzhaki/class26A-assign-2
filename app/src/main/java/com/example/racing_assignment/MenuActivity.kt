@@ -18,7 +18,6 @@ class MenuActivity : AppCompatActivity() {
 
         Glide.with(this)
             .load(R.drawable.menu_background)
-            .centerCrop()
             .into(binding.menuBackground)
 
         binding.buttons.setOnClickListener {

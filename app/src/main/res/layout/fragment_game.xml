@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gameContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".GameFragment">
@@ -14,570 +15,78 @@
         tools:src="@drawable/background_road" />
 
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
+        <TextView
+            android:id="@+id/scoreText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="right"
-            android:orientation="horizontal">
+            android:text="0"
+            android:textSize="24sp"
+            android:textColor="@android:color/white" />
 
-            <ImageView
-                android:id="@+id/heart1_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_heart"/>
-            <ImageView
-                android:id="@+id/heart1_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:src="@drawable/ic_heart"/>
-            <ImageView
-                android:id="@+id/heart1_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_heart"/>
+        <ImageView
+            android:id="@+id/heart1_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_heart"/>
+        <ImageView
+            android:id="@+id/heart1_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:src="@drawable/ic_heart"/>
+        <ImageView
+            android:id="@+id/heart1_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_heart"/>
+    </LinearLayout>
 
-        </LinearLayout>
+    <ImageView
+        android:id="@+id/raceCar"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+        android:src="@drawable/ic_racecar"/>
 
-        <LinearLayout
-            android:id="@+id/row1"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+    <LinearLayout
+        android:id="@+id/controlsBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="16dp"
+        android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/leftArrow"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            app:iconGravity="textStart"
+            app:iconSize="80dp"
+            app:icon="@drawable/ic_arrow"/>
 
-                <ImageView
-                    android:id="@+id/bomb1_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
-                <ImageView
-                    android:id="@+id/bomb1_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb1_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb1_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb1_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/row2"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb2_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb2_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb2_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb2_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb2_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/row3"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb3_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb3_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb3_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb3_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb3_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/row4"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb4_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb4_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb4_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb4_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb4_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/row5"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb5_1"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb5_2"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb5_3"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb5_4"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-
-                <ImageView
-                    android:id="@+id/bomb5_5"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:visibility="invisible"
-                    android:src="@drawable/ic_bomb"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/row6"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:baselineAligned="false"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <ImageView
-                        android:id="@+id/bomb6_1"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_bomb"
-                        android:visibility="invisible" />
-                    <ImageView
-                        android:id="@+id/raceCar1_1"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_racecar"/>
-                </FrameLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:id="@+id/bomb6_2"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_bomb"/>
-                    <ImageView
-                        android:id="@+id/raceCar1_2"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_racecar"/>
-                </FrameLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:id="@+id/bomb6_3"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_bomb"/>
-                    <ImageView
-                        android:id="@+id/raceCar1_3"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:src="@drawable/ic_racecar"/>
-                </FrameLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:id="@+id/bomb6_4"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_bomb"/>
-                    <ImageView
-                        android:id="@+id/raceCar1_4"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_racecar"/>
-                </FrameLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center_horizontal|center_vertical">
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                    <ImageView
-                        android:id="@+id/bomb6_5"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_bomb"/>
-                    <ImageView
-                        android:id="@+id/raceCar1_5"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:visibility="invisible"
-                        android:src="@drawable/ic_racecar"/>
-                </FrameLayout>
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/row7"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/leftArrow"
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="30dp"
-                app:iconGravity="textStart"
-                app:iconSize="80dp"
-
-                app:icon="@drawable/ic_arrow"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/rightArrow"
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="150dp"
-                app:icon="@drawable/ic_arrow"
-                app:iconSize="80dp"
-                app:iconGravity="textStart"
-                android:rotation="180"/>
-        </LinearLayout>
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/rightArrow"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            app:icon="@drawable/ic_arrow"
+            app:iconSize="80dp"
+            app:iconGravity="textStart"
+            android:rotation="180"/>
     </LinearLayout>
 
 </RelativeLayout>
-

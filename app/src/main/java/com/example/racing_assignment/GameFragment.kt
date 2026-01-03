@@ -21,7 +21,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.SoundPool
 import com.bumptech.glide.Glide
+import androidx.core.content.edit
 
 class GameFragment : Fragment() {
 
@@ -40,7 +42,10 @@ class GameFragment : Fragment() {
     private var screenWidth = 0
     private var laneWidth = 0
     private val laneCount = 5
-
+    private var gameSpeed = 3000L
+    private lateinit var soundPool: SoundPool
+    private var coinSound: Int = 0
+    private var bombSound: Int = 0
     // Sensor properties
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
@@ -48,20 +53,30 @@ class GameFragment : Fragment() {
         override fun onSensorChanged(event: SensorEvent) {
             if (gameEnded) return
             val x = event.values[0]
+            val y = event.values[1]  // forward/backward tilt
 
-            when {
-                x < -3 && canMove && currentLane < 4 -> {
-                    canMove = false
-                    currentLane++
-                    moveCarToLane(currentLane)
-                    handler.postDelayed({ canMove = true }, 300)
-                }
-                x > 3 && canMove && currentLane > 0 -> {
-                    canMove = false
-                    currentLane--
-                    moveCarToLane(currentLane)
-                    handler.postDelayed({ canMove = true }, 300)
-                }
+            // Map tilt to lane: -10 to 10 -> 0 to 4
+            val targetLane = when {
+                x < -6 -> 4
+                x < -3 -> 3
+                x > 6 -> 0
+                x > 3 -> 1
+                else -> 2  // center
+            }
+
+            if (targetLane != currentLane) {
+                currentLane = targetLane
+                moveCarToLane(currentLane)
+            }
+
+            // Map forward/backward tilt to speed
+            // y positive = tilt forward (faster), y negative = tilt backward (slower)
+            gameSpeed = when {
+                y < -6 -> 1500L  // very fast
+                y < -3 -> 2000L  // fast
+                y > 6 -> 5000L   // very slow
+                y > 3 -> 4000L   // slow
+                else -> 3000L    // normal
             }
         }
 
@@ -73,7 +88,9 @@ class GameFragment : Fragment() {
             if (!gameEnded) {
                 score++
                 scoreText.text = score.toString()
-                handler.postDelayed(this, 500)
+                // Faster game = faster score (scale 1000ms based on gameSpeed)
+                val scoreDelay = (gameSpeed / 3).coerceIn(300L, 1700L)
+                handler.postDelayed(this, scoreDelay)
             }
         }
     }
@@ -90,6 +107,12 @@ class GameFragment : Fragment() {
             .into(view.findViewById(R.id.background_road))
 
         useButtons = arguments?.getBoolean("useButtons", true) ?: true
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(5)
+            .build()
+        coinSound = soundPool.load(requireContext(), R.raw.coin_collect, 1)
+        bombSound = soundPool.load(requireContext(), R.raw.bomb_hit, 1)
 
         initializeViews(view)
 
@@ -132,6 +155,7 @@ class GameFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
+        soundPool.release()
     }
 
     private fun initializeViews(view: View) {
@@ -180,6 +204,10 @@ class GameFragment : Fragment() {
     private fun setupSensors() {
         sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        accelerometer?.let {
+            sensorManager?.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
+        }
     }
 
     private val gameLoop = object : Runnable {
@@ -214,7 +242,7 @@ class GameFragment : Fragment() {
 
         imageView.animate()
             .y(endY)
-            .setDuration(3000)
+            .setDuration(gameSpeed)
             .setUpdateListener { animation ->
                 if (gameEnded) {
                     animation.cancel()
@@ -227,6 +255,7 @@ class GameFragment : Fragment() {
 
                 if (objectY >= carY - 60 && objectY <= carY + 60 && objectLane == currentLane) {
                     if (isCoin) {
+                        soundPool.play(coinSound, 1f, 1f, 1, 0, 1f)
                         score += 10
                         scoreText.text = score.toString()
                         gameContainer.removeView(imageView)
@@ -249,6 +278,7 @@ class GameFragment : Fragment() {
 
         liveCounter--
         lives.removeLives(liveCounter)
+        soundPool.play(bombSound, 1f, 1f, 1, 0, 1f)
         vibrate()
 
         if (liveCounter == 0) {
@@ -295,9 +325,9 @@ class GameFragment : Fragment() {
             if (score > existingScore) {
                 for (j in 10 downTo i + 1) {
                     val scoreToMove = prefs.getInt("record${j - 1}", 0)
-                    prefs.edit().putInt("record$j", scoreToMove).apply()
+                    prefs.edit { putInt("record$j", scoreToMove) }
                 }
-                prefs.edit().putInt("record$i", score).apply()
+                prefs.edit { putInt("record$i", score) }
                 break
             }
         }

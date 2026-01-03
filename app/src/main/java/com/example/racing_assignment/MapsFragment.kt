@@ -31,12 +31,15 @@ class MapsFragment : Fragment(), OnMapReadyCallback {
         score = arguments?.getInt("score", 0) ?: 0
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment
-            ?: SupportMapFragment.newInstance().also {
-                childFragmentManager.beginTransaction()
-                    .replace(R.id.map, it)
-                    .commit()
-            }
-        mapFragment.getMapAsync(this)
+        if (mapFragment == null) {
+            val newMapFragment = SupportMapFragment.newInstance()
+            childFragmentManager.beginTransaction()
+                .replace(R.id.map, newMapFragment)
+                .commit()
+            newMapFragment.getMapAsync(this)
+        } else {
+            mapFragment.getMapAsync(this)
+        }
 
         view.findViewById<ImageButton>(R.id.backButton).setOnClickListener {
             parentFragmentManager.popBackStack()

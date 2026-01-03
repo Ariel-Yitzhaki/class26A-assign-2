@@ -333,6 +333,7 @@ class GameFragment : Fragment() {
 
         for (i in 1..10) {
             val existingScore = prefs.getInt("record$i", 0)
+
             if (score > existingScore) {
                 for (j in 10 downTo i + 1) {
                     val scoreToMove = prefs.getInt("record${j - 1}", 0)

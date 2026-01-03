@@ -13,7 +13,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class MenuActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMenuBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -23,6 +22,13 @@ class MenuActivity : AppCompatActivity() {
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportFragmentManager.addOnBackStackChangedListener {
+            // If stack has entries (>0), a fragment is open -> Disable buttons
+            // If stack is empty (0), we are at home -> Enable buttons
+            val shouldEnable = supportFragmentManager.backStackEntryCount == 0
+            setButtonsEnabled(shouldEnable)
+        }
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         requestLocationPermission()
 
@@ -31,27 +37,11 @@ class MenuActivity : AppCompatActivity() {
             .into(binding.menuBackground)
 
         binding.buttons.setOnClickListener {
-            val fragment = GameFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean("useButtons", true)
-                }
-            }
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+            openGameFragment(true)
         }
 
         binding.sensors.setOnClickListener {
-            val fragment = GameFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean("useButtons", false)
-                }
-            }
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
+            openGameFragment(false)
         }
 
         binding.records.setOnClickListener {
@@ -61,6 +51,24 @@ class MenuActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
         }
+    }
+
+    private fun setButtonsEnabled(isEnabled: Boolean) {
+        binding.buttons.isEnabled = isEnabled
+        binding.sensors.isEnabled = isEnabled
+        binding.records.isEnabled = isEnabled
+    }
+
+    private fun openGameFragment(useButtons: Boolean) {
+        val fragment = GameFragment().apply {
+            arguments = Bundle().apply {
+                putBoolean("useButtons", useButtons)
+            }
+        }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun requestLocationPermission() {
@@ -83,6 +91,5 @@ class MenuActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // Permission handled, GameFragment will use it
     }
 }

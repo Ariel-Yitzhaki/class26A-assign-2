@@ -34,14 +34,30 @@ class RecordsFragment : Fragment() {
 
         records.forEachIndexed { index, textView ->
             val score = prefs.getInt("record${index + 1}", 0)
+            val lat = prefs.getFloat("lat${index + 1}", 0f)
+            val lon = prefs.getFloat("lon${index + 1}", 0f)
+
             if (score > 0) {
                 textView.text = "$score"
                 textView.visibility = View.VISIBLE
             } else {
                 textView.visibility = View.GONE
             }
+
             textView.setOnClickListener {
-                // TODO: handle record click
+                if (lat != 0f && lon != 0f) {
+                    val mapsFragment = MapsFragment().apply {
+                        arguments = Bundle().apply {
+                            putDouble("latitude", lat.toDouble())
+                            putDouble("longitude", lon.toDouble())
+                            putInt("score", score)
+                        }
+                    }
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, mapsFragment)
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
         }
 

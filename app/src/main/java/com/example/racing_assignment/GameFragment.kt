@@ -24,6 +24,11 @@ import android.hardware.SensorManager
 import android.media.SoundPool
 import com.bumptech.glide.Glide
 import androidx.core.content.edit
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 
 class GameFragment : Fragment() {
 
@@ -43,6 +48,9 @@ class GameFragment : Fragment() {
     private var laneWidth = 0
     private val laneCount = 5
     private var gameSpeed = 3000L
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var lastLatitude: Double = 0.0
+    private var lastLongitude: Double = 0.0
     private lateinit var soundPool: SoundPool
     private var coinSound: Int = 0
     private var bombSound: Int = 0
@@ -101,6 +109,9 @@ class GameFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        requestLocation()
 
         Glide.with(this)
             .load(R.drawable.background_road)
@@ -327,9 +338,29 @@ class GameFragment : Fragment() {
                     val scoreToMove = prefs.getInt("record${j - 1}", 0)
                     prefs.edit { putInt("record$j", scoreToMove) }
                 }
-                prefs.edit { putInt("record$i", score) }
+                prefs.edit {
+                    putInt("record$i", score)
+                        .putFloat("lat$i", lastLatitude.toFloat())
+                        .putFloat("lon$i", lastLongitude.toFloat())
+                }
                 break
             }
         }
     }
+
+    private fun requestLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    lastLatitude = location.latitude
+                    lastLongitude = location.longitude
+                }
+            }
+        }
+    }
 }
+

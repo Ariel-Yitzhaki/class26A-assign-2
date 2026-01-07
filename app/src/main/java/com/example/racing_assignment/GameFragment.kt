@@ -1,36 +1,20 @@
 package com.example.racing_assignment
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.media.SoundPool
 import com.bumptech.glide.Glide
-import androidx.core.content.edit
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 
-class GameFragment : Fragment() {
+class GameFragment : Fragment(), SensorController.SensorCallback {
 
     private val handler = Handler(Looper.getMainLooper())
     private var currentLane = 2
@@ -40,6 +24,7 @@ class GameFragment : Fragment() {
     private var useButtons = true
     private var gameEnded = false
     private var score = 0
+
     private lateinit var gameContainer: RelativeLayout
     private lateinit var raceCar: ImageView
     private lateinit var scoreText: TextView
@@ -48,55 +33,19 @@ class GameFragment : Fragment() {
     private var laneWidth = 0
     private val laneCount = 5
     private var gameSpeed = 3000L
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var lastLatitude: Double = 0.0
-    private var lastLongitude: Double = 0.0
-    private lateinit var soundPool: SoundPool
-    private var coinSound: Int = 0
-    private var bombSound: Int = 0
-    // Sensor properties
-    private var sensorManager: SensorManager? = null
-    private var accelerometer: Sensor? = null
-    private val sensorListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            if (gameEnded) return
-            val x = event.values[0]
-            val y = event.values[1]  // forward/backward tilt
 
-            // Map tilt to lane: -10 to 10 -> 0 to 4
-            val targetLane = when {
-                x < -6 -> 4
-                x < -3 -> 3
-                x > 6 -> 0
-                x > 3 -> 1
-                else -> 2  // center
-            }
-
-            if (targetLane != currentLane) {
-                currentLane = targetLane
-                moveCarToLane(currentLane)
-            }
-
-            // Map forward/backward tilt to speed
-            // y positive = tilt forward (faster), y negative = tilt backward (slower)
-            gameSpeed = when {
-                y < -6 -> 1500L  // very fast
-                y < -3 -> 2000L  // fast
-                y > 6 -> 5000L   // very slow
-                y > 3 -> 4000L   // slow
-                else -> 3000L    // normal
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-    }
+    // Controllers
+    private lateinit var sensorController: SensorController
+    private lateinit var soundController: SoundController
+    private lateinit var vibrationController: VibrationController
+    private lateinit var locationController: LocationController
+    private lateinit var scoreManager: ScoreManager
 
     private val scoreRunnable = object : Runnable {
         override fun run() {
             if (!gameEnded) {
                 score++
                 scoreText.text = score.toString()
-                // Faster game = faster score (scale 1000ms based on gameSpeed)
                 val scoreDelay = (gameSpeed / 3).coerceIn(300L, 1700L)
                 handler.postDelayed(this, scoreDelay)
             }
@@ -110,20 +59,13 @@ class GameFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        requestLocation()
+        initControllers()
 
         Glide.with(this)
             .load(R.drawable.background_road)
             .into(view.findViewById(R.id.background_road))
 
         useButtons = arguments?.getBoolean("useButtons", true) ?: true
-
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(5)
-            .build()
-        coinSound = soundPool.load(requireContext(), R.raw.coin_collect, 1)
-        bombSound = soundPool.load(requireContext(), R.raw.bomb_hit, 1)
 
         initializeViews(view)
 
@@ -137,7 +79,7 @@ class GameFragment : Fragment() {
             } else {
                 view.findViewById<Button>(R.id.leftArrow).visibility = View.GONE
                 view.findViewById<Button>(R.id.rightArrow).visibility = View.GONE
-                setupSensors()
+                sensorController.register()
             }
 
             handler.post(gameLoop)
@@ -147,26 +89,44 @@ class GameFragment : Fragment() {
         return view
     }
 
+    private fun initControllers() {
+        val context = requireContext()
+        sensorController = SensorController(context).apply { setCallback(this@GameFragment) }
+        soundController = SoundController(context)
+        vibrationController = VibrationController(context)
+        locationController = LocationController(requireActivity()).apply { requestLocation() }
+        scoreManager = ScoreManager(context)
+    }
+
+    override fun onTiltChanged(targetLane: Int, gameSpeed: Long) {
+        if (gameEnded) return
+
+        this.gameSpeed = gameSpeed
+
+        if (targetLane != currentLane) {
+            currentLane = targetLane
+            moveCarToLane(currentLane)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         if (!useButtons) {
-            accelerometer?.let {
-                sensorManager?.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
-            }
+            sensorController.register()
         }
     }
 
     override fun onPause() {
         super.onPause()
         if (!useButtons) {
-            sensorManager?.unregisterListener(sensorListener)
+            sensorController.unregister()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
-        soundPool.release()
+        soundController.release()
     }
 
     private fun initializeViews(view: View) {
@@ -212,15 +172,6 @@ class GameFragment : Fragment() {
         }
     }
 
-    private fun setupSensors() {
-        sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        accelerometer?.let {
-            sensorManager?.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
-        }
-    }
-
     private val gameLoop = object : Runnable {
         override fun run() {
             if (!gameEnded) {
@@ -232,7 +183,7 @@ class GameFragment : Fragment() {
 
     private fun spawnObject() {
         val lane = (0 until laneCount).random()
-        val isCoin = (0..10).random() > 7  // 30% chance for coin
+        val isCoin = (0..10).random() > 7
 
         val imageView = ImageView(requireContext()).apply {
             setImageResource(if (isCoin) R.drawable.ic_coin else R.drawable.ic_bomb)
@@ -260,22 +211,19 @@ class GameFragment : Fragment() {
                     return@setUpdateListener
                 }
 
-                // Check collision when object reaches car level
                 val objectY = imageView.y
                 val objectLane = ((imageView.x + (if (isCoin) 40 else 50)) / laneWidth).toInt()
 
                 if (objectY >= carY - 60 && objectY <= carY + 60 && objectLane == currentLane) {
                     if (isCoin) {
-                        soundPool.play(coinSound, 1f, 1f, 1, 0, 1f)
+                        soundController.playCoinSound()
                         score += 10
                         scoreText.text = score.toString()
-                        gameContainer.removeView(imageView)
-                        animation.cancel()
                     } else {
                         handleCollision()
-                        gameContainer.removeView(imageView)
-                        animation.cancel()
                     }
+                    gameContainer.removeView(imageView)
+                    animation.cancel()
                 }
             }
             .withEndAction {
@@ -289,8 +237,8 @@ class GameFragment : Fragment() {
 
         liveCounter--
         lives.removeLives(liveCounter)
-        soundPool.play(bombSound, 1f, 1f, 1, 0, 1f)
-        vibrate()
+        soundController.playBombSound()
+        vibrationController.vibrate()
 
         if (liveCounter == 0) {
             Toast.makeText(requireContext(), "Game Over", Toast.LENGTH_SHORT).show()
@@ -300,68 +248,13 @@ class GameFragment : Fragment() {
         }
     }
 
-    @Suppress("DEPRECATION")
-    private fun vibrate() {
-        if (!isAdded) return
-        val context = requireContext()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val vibrator = vibratorManager.defaultVibrator
-            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            vibrator.vibrate(500)
-        }
-    }
-
     private fun endGame() {
         if (gameEnded) return
         gameEnded = true
         handler.removeCallbacksAndMessages(null)
         if (isAdded) {
-            saveScoreIfHighScore()
+            scoreManager.saveScore(score, locationController.latitude, locationController.longitude)
             parentFragmentManager.popBackStack()
         }
     }
-
-    private fun saveScoreIfHighScore() {
-        if (!isAdded) return
-        val prefs = requireContext().getSharedPreferences("records", Context.MODE_PRIVATE)
-
-        for (i in 1..10) {
-            val existingScore = prefs.getInt("record$i", 0)
-
-            if (score > existingScore) {
-                for (j in 10 downTo i + 1) {
-                    val scoreToMove = prefs.getInt("record${j - 1}", 0)
-                    prefs.edit { putInt("record$j", scoreToMove) }
-                }
-                prefs.edit {
-                    putInt("record$i", score)
-                        .putFloat("lat$i", lastLatitude.toFloat())
-                        .putFloat("lon$i", lastLongitude.toFloat())
-                }
-                break
-            }
-        }
-    }
-
-    private fun requestLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    lastLatitude = location.latitude
-                    lastLongitude = location.longitude
-                }
-            }
-        }
-    }
 }
-

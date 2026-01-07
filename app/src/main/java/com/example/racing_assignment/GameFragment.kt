@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.os.Handler
 import android.os.Looper
 import android.widget.Button
-import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -17,24 +16,20 @@ import com.bumptech.glide.Glide
 class GameFragment : Fragment(), SensorController.SensorCallback {
 
     private val handler = Handler(Looper.getMainLooper())
-    private var currentLane = 2
     private var canMove = true
-    private lateinit var lives: LivesController
-    private var liveCounter = 3
     private var useButtons = true
-    private var gameEnded = false
-    private var score = 0
 
-    private lateinit var gameContainer: RelativeLayout
-    private lateinit var raceCar: ImageView
     private lateinit var scoreText: TextView
+    private lateinit var carController: CarController
+    private lateinit var livesController: LivesController
 
-    private var screenWidth = 0
-    private var laneWidth = 0
-    private val laneCount = 5
-    private var gameSpeed = 3000L
+    private lateinit var bombColumns: Array<Array<ImageView>>
+    private lateinit var coinColumns: Array<Array<ImageView>>
+
+    private val activeAnimators = mutableListOf<ObjectAnimator>()
 
     // Controllers
+    private lateinit var gameManager: GameManager
     private lateinit var sensorController: SensorController
     private lateinit var soundController: SoundController
     private lateinit var vibrationController: VibrationController
@@ -43,11 +38,18 @@ class GameFragment : Fragment(), SensorController.SensorCallback {
 
     private val scoreRunnable = object : Runnable {
         override fun run() {
-            if (!gameEnded) {
-                score++
-                scoreText.text = score.toString()
-                val scoreDelay = (gameSpeed / 3).coerceIn(300L, 1700L)
-                handler.postDelayed(this, scoreDelay)
+            if (!gameManager.gameEnded) {
+                gameManager.incrementScore()
+                handler.postDelayed(this, gameManager.getScoreDelay())
+            }
+        }
+    }
+
+    private val gameLoop = object : Runnable {
+        override fun run() {
+            if (!gameManager.gameEnded) {
+                spawnObject()
+                handler.postDelayed(this, 1500)
             }
         }
     }
@@ -59,6 +61,7 @@ class GameFragment : Fragment(), SensorController.SensorCallback {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_game, container, false)
 
+        initGameManager()
         initControllers()
 
         Glide.with(this)
@@ -69,24 +72,45 @@ class GameFragment : Fragment(), SensorController.SensorCallback {
 
         initializeViews(view)
 
-        view.post {
-            screenWidth = view.width
-            laneWidth = screenWidth / laneCount
-            moveCarToLane(currentLane)
-
-            if (useButtons) {
-                setupButtons(view)
-            } else {
-                view.findViewById<Button>(R.id.leftArrow).visibility = View.GONE
-                view.findViewById<Button>(R.id.rightArrow).visibility = View.GONE
-                sensorController.register()
-            }
-
-            handler.post(gameLoop)
-            handler.post(scoreRunnable)
+        if (useButtons) {
+            setupButtons(view)
+        } else {
+            view.findViewById<Button>(R.id.leftArrow).visibility = View.GONE
+            view.findViewById<Button>(R.id.rightArrow).visibility = View.GONE
+            sensorController.register()
         }
 
+        carController.showCar(gameManager.currentLane)
+
+        handler.post(gameLoop)
+        handler.post(scoreRunnable)
+
         return view
+    }
+
+    private fun initGameManager() {
+        gameManager = GameManager(
+            onScoreChanged = { score ->
+                scoreText.text = score.toString()
+            },
+            onLivesChanged = { lives ->
+                livesController.removeLives(lives)
+            },
+            onGameOver = {
+                Toast.makeText(requireContext(), "Game Over", Toast.LENGTH_SHORT).show()
+                handler.postDelayed({ endGame() }, 1000)
+            },
+            onCoinCollected = {
+                soundController.playCoinSound()
+            },
+            onBombHit = {
+                soundController.playBombSound()
+                vibrationController.vibrate()
+                if (gameManager.lives > 0) {
+                    Toast.makeText(requireContext(), "Watch Out!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
     }
 
     private fun initControllers() {
@@ -98,15 +122,141 @@ class GameFragment : Fragment(), SensorController.SensorCallback {
         scoreManager = ScoreManager(context)
     }
 
-    override fun onTiltChanged(targetLane: Int, gameSpeed: Long) {
-        if (gameEnded) return
+    private fun initializeViews(view: View) {
+        scoreText = view.findViewById(R.id.scoreText)
 
-        this.gameSpeed = gameSpeed
+        carController = CarController(
+            view.findViewById(R.id.car_1),
+            view.findViewById(R.id.car_2),
+            view.findViewById(R.id.car_3),
+            view.findViewById(R.id.car_4),
+            view.findViewById(R.id.car_5)
+        )
 
-        if (targetLane != currentLane) {
-            currentLane = targetLane
-            moveCarToLane(currentLane)
+        livesController = LivesController(
+            view.findViewById(R.id.heart1_3),
+            view.findViewById(R.id.heart1_2),
+            view.findViewById(R.id.heart1_1)
+        )
+
+        bombColumns = arrayOf(
+            arrayOf(
+                view.findViewById(R.id.bomb1_1), view.findViewById(R.id.bomb2_1),
+                view.findViewById(R.id.bomb3_1), view.findViewById(R.id.bomb4_1),
+                view.findViewById(R.id.bomb5_1), view.findViewById(R.id.bomb6_1)
+            ),
+            arrayOf(
+                view.findViewById(R.id.bomb1_2), view.findViewById(R.id.bomb2_2),
+                view.findViewById(R.id.bomb3_2), view.findViewById(R.id.bomb4_2),
+                view.findViewById(R.id.bomb5_2), view.findViewById(R.id.bomb6_2)
+            ),
+            arrayOf(
+                view.findViewById(R.id.bomb1_3), view.findViewById(R.id.bomb2_3),
+                view.findViewById(R.id.bomb3_3), view.findViewById(R.id.bomb4_3),
+                view.findViewById(R.id.bomb5_3), view.findViewById(R.id.bomb6_3)
+            ),
+            arrayOf(
+                view.findViewById(R.id.bomb1_4), view.findViewById(R.id.bomb2_4),
+                view.findViewById(R.id.bomb3_4), view.findViewById(R.id.bomb4_4),
+                view.findViewById(R.id.bomb5_4), view.findViewById(R.id.bomb6_4)
+            ),
+            arrayOf(
+                view.findViewById(R.id.bomb1_5), view.findViewById(R.id.bomb2_5),
+                view.findViewById(R.id.bomb3_5), view.findViewById(R.id.bomb4_5),
+                view.findViewById(R.id.bomb5_5), view.findViewById(R.id.bomb6_5)
+            )
+        )
+
+        coinColumns = arrayOf(
+            arrayOf(
+                view.findViewById(R.id.coin1_1), view.findViewById(R.id.coin2_1),
+                view.findViewById(R.id.coin3_1), view.findViewById(R.id.coin4_1),
+                view.findViewById(R.id.coin5_1), view.findViewById(R.id.coin6_1)
+            ),
+            arrayOf(
+                view.findViewById(R.id.coin1_2), view.findViewById(R.id.coin2_2),
+                view.findViewById(R.id.coin3_2), view.findViewById(R.id.coin4_2),
+                view.findViewById(R.id.coin5_2), view.findViewById(R.id.coin6_2)
+            ),
+            arrayOf(
+                view.findViewById(R.id.coin1_3), view.findViewById(R.id.coin2_3),
+                view.findViewById(R.id.coin3_3), view.findViewById(R.id.coin4_3),
+                view.findViewById(R.id.coin5_3), view.findViewById(R.id.coin6_3)
+            ),
+            arrayOf(
+                view.findViewById(R.id.coin1_4), view.findViewById(R.id.coin2_4),
+                view.findViewById(R.id.coin3_4), view.findViewById(R.id.coin4_4),
+                view.findViewById(R.id.coin5_4), view.findViewById(R.id.coin6_4)
+            ),
+            arrayOf(
+                view.findViewById(R.id.coin1_5), view.findViewById(R.id.coin2_5),
+                view.findViewById(R.id.coin3_5), view.findViewById(R.id.coin4_5),
+                view.findViewById(R.id.coin5_5), view.findViewById(R.id.coin6_5)
+            )
+        )
+    }
+
+    private fun setupButtons(view: View) {
+        val buttonLeft = view.findViewById<Button>(R.id.leftArrow)
+        val buttonRight = view.findViewById<Button>(R.id.rightArrow)
+
+        buttonLeft.setOnClickListener {
+            if (canMove) {
+                val oldLane = gameManager.currentLane
+                if (gameManager.moveLeft()) {
+                    canMove = false
+                    carController.moveCar(oldLane, gameManager.currentLane)
+                    handler.postDelayed({ canMove = true }, 100)
+                }
+            }
         }
+
+        buttonRight.setOnClickListener {
+            if (canMove) {
+                val oldLane = gameManager.currentLane
+                if (gameManager.moveRight()) {
+                    canMove = false
+                    carController.moveCar(oldLane, gameManager.currentLane)
+                    handler.postDelayed({ canMove = true }, 100)
+                }
+            }
+        }
+    }
+
+    override fun onTiltChanged(targetLane: Int, gameSpeed: Long) {
+        if (gameManager.gameEnded) return
+
+        gameManager.gameSpeed = gameSpeed
+
+        if (canMove) {
+            val oldLane = gameManager.currentLane
+            if (gameManager.moveToLane(targetLane)) {
+                carController.moveCar(oldLane, gameManager.currentLane)
+            }
+        }
+    }
+
+    private fun spawnObject() {
+        val column = gameManager.getAvailableColumn() ?: return
+        val isCoin = gameManager.shouldSpawnCoin()
+
+        gameManager.startAnimatingColumn(column)
+
+        val animator = ObjectAnimator(
+            bombs = bombColumns[column],
+            coins = coinColumns[column],
+            isCoin = isCoin,
+            getSpeed = { gameManager.gameSpeed },
+            onReachedBottom = {
+                gameManager.onObjectReachedBottom(column, isCoin)
+            },
+            onFinished = {
+                gameManager.onObjectFinished(column)
+            }
+        )
+
+        activeAnimators.add(animator)
+        animator.start()
     }
 
     override fun onResume() {
@@ -126,134 +276,17 @@ class GameFragment : Fragment(), SensorController.SensorCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
+        activeAnimators.forEach { it.stop() }
         soundController.release()
     }
 
-    private fun initializeViews(view: View) {
-        gameContainer = view.findViewById(R.id.gameContainer)
-        raceCar = view.findViewById(R.id.raceCar)
-        scoreText = view.findViewById(R.id.scoreText)
-
-        lives = LivesController(
-            view.findViewById(R.id.heart1_3),
-            view.findViewById(R.id.heart1_2),
-            view.findViewById(R.id.heart1_1)
-        )
-    }
-
-    private fun moveCarToLane(lane: Int) {
-        val targetX = (lane * laneWidth) + (laneWidth / 2) - (raceCar.width / 2)
-        raceCar.animate()
-            .x(targetX.toFloat())
-            .setDuration(100)
-            .start()
-    }
-
-    private fun setupButtons(view: View) {
-        val buttonLeft = view.findViewById<Button>(R.id.leftArrow)
-        val buttonRight = view.findViewById<Button>(R.id.rightArrow)
-
-        buttonLeft.setOnClickListener {
-            if (canMove && currentLane > 0) {
-                canMove = false
-                currentLane--
-                moveCarToLane(currentLane)
-                handler.postDelayed({ canMove = true }, 100)
-            }
-        }
-
-        buttonRight.setOnClickListener {
-            if (canMove && currentLane < 4) {
-                canMove = false
-                currentLane++
-                moveCarToLane(currentLane)
-                handler.postDelayed({ canMove = true }, 100)
-            }
-        }
-    }
-
-    private val gameLoop = object : Runnable {
-        override fun run() {
-            if (!gameEnded) {
-                spawnObject()
-                handler.postDelayed(this, 1500)
-            }
-        }
-    }
-
-    private fun spawnObject() {
-        val lane = (0 until laneCount).random()
-        val isCoin = (0..10).random() > 7
-
-        val imageView = ImageView(requireContext()).apply {
-            setImageResource(if (isCoin) R.drawable.ic_coin else R.drawable.ic_bomb)
-            layoutParams = RelativeLayout.LayoutParams(
-                if (isCoin) 80 else 100,
-                if (isCoin) 80 else 100
-            )
-        }
-
-        gameContainer.addView(imageView)
-
-        val startX = (lane * laneWidth) + (laneWidth / 2) - (if (isCoin) 40 else 50)
-        imageView.x = startX.toFloat()
-        imageView.y = 0f
-
-        val endY = gameContainer.height.toFloat()
-        val carY = raceCar.y
-
-        imageView.animate()
-            .y(endY)
-            .setDuration(gameSpeed)
-            .setUpdateListener { animation ->
-                if (gameEnded) {
-                    animation.cancel()
-                    return@setUpdateListener
-                }
-
-                val objectY = imageView.y
-                val objectLane = ((imageView.x + (if (isCoin) 40 else 50)) / laneWidth).toInt()
-
-                if (objectY >= carY - 60 && objectY <= carY + 60 && objectLane == currentLane) {
-                    if (isCoin) {
-                        soundController.playCoinSound()
-                        score += 10
-                        scoreText.text = score.toString()
-                    } else {
-                        handleCollision()
-                    }
-                    gameContainer.removeView(imageView)
-                    animation.cancel()
-                }
-            }
-            .withEndAction {
-                gameContainer.removeView(imageView)
-            }
-            .start()
-    }
-
-    private fun handleCollision() {
-        if (gameEnded || !isAdded || liveCounter <= 0) return
-
-        liveCounter--
-        lives.removeLives(liveCounter)
-        soundController.playBombSound()
-        vibrationController.vibrate()
-
-        if (liveCounter == 0) {
-            Toast.makeText(requireContext(), "Game Over", Toast.LENGTH_SHORT).show()
-            handler.postDelayed({ endGame() }, 1000)
-        } else {
-            Toast.makeText(requireContext(), "Watch Out!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun endGame() {
-        if (gameEnded) return
-        gameEnded = true
+        if (gameManager.gameEnded) return
+        gameManager.endGame()
         handler.removeCallbacksAndMessages(null)
+        activeAnimators.forEach { it.stop() }
         if (isAdded) {
-            scoreManager.saveScore(score, locationController.latitude, locationController.longitude)
+            scoreManager.saveScore(gameManager.score, locationController.latitude, locationController.longitude)
             parentFragmentManager.popBackStack()
         }
     }

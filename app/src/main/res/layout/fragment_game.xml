@@ -15,78 +15,257 @@
         tools:src="@drawable/background_road" />
 
     <LinearLayout
-        android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/scoreText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="0"
-            android:textSize="24sp"
-            android:textColor="@android:color/white" />
-
-        <ImageView
-            android:id="@+id/heart1_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_heart"/>
-        <ImageView
-            android:id="@+id/heart1_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="10dp"
-            android:src="@drawable/ic_heart"/>
-        <ImageView
-            android:id="@+id/heart1_3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_heart"/>
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/raceCar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="100dp"
-        android:src="@drawable/ic_racecar"/>
-
-    <LinearLayout
-        android:id="@+id/controlsBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:padding="16dp"
-        android:orientation="horizontal">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/leftArrow"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            app:iconGravity="textStart"
-            app:iconSize="80dp"
-            app:icon="@drawable/ic_arrow"/>
-
-        <View
-            android:layout_width="0dp"
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/rightArrow"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            app:icon="@drawable/ic_arrow"
-            app:iconSize="80dp"
-            app:iconGravity="textStart"
-            android:rotation="180"/>
+            <TextView
+                android:id="@+id/scoreText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0"
+                android:textSize="24sp"
+                android:textColor="@android:color/white" />
+
+            <ImageView
+                android:id="@+id/heart1_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_heart"/>
+            <ImageView
+                android:id="@+id/heart1_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:src="@drawable/ic_heart"/>
+            <ImageView
+                android:id="@+id/heart1_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_heart"/>
+        </LinearLayout>
+
+        <!-- Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb1_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin1_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb1_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin1_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb1_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin1_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb1_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin1_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb1_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin1_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb2_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin2_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb2_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin2_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb2_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin2_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb2_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin2_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb2_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin2_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb3_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin3_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb3_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin3_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb3_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin3_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb3_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin3_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb3_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin3_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb4_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin4_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb4_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin4_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb4_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin4_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb4_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin4_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb4_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin4_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 5 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb5_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin5_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb5_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin5_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb5_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin5_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb5_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin5_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb5_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin5_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Row 6 (Car row) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb6_1" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin6_1" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+                <ImageView android:id="@+id/car_1" android:layout_width="60dp" android:layout_height="60dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_racecar"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb6_2" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin6_2" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+                <ImageView android:id="@+id/car_2" android:layout_width="60dp" android:layout_height="60dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_racecar"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb6_3" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin6_3" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+                <ImageView android:id="@+id/car_3" android:layout_width="60dp" android:layout_height="60dp" android:layout_gravity="center" android:src="@drawable/ic_racecar"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb6_4" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin6_4" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+                <ImageView android:id="@+id/car_4" android:layout_width="60dp" android:layout_height="60dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_racecar"/>
+            </FrameLayout>
+            <FrameLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <ImageView android:id="@+id/bomb6_5" android:layout_width="50dp" android:layout_height="50dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_bomb"/>
+                <ImageView android:id="@+id/coin6_5" android:layout_width="40dp" android:layout_height="40dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_coin"/>
+                <ImageView android:id="@+id/car_5" android:layout_width="60dp" android:layout_height="60dp" android:layout_gravity="center" android:visibility="invisible" android:src="@drawable/ic_racecar"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/leftArrow"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                app:icon="@drawable/ic_arrow"
+                app:iconGravity="textStart"
+                app:iconSize="80dp"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rightArrow"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:rotation="180"
+                app:icon="@drawable/ic_arrow"
+                app:iconGravity="textStart"
+                app:iconSize="80dp"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -5,7 +5,7 @@
     android:id="@+id/gameContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GameFragment">
+    tools:context=".fragments.GameFragment">
 
     <ImageView
         android:id="@+id/background_road"

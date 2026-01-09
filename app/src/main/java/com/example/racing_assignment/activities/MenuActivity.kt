@@ -1,16 +1,19 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.activities
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.example.racing_assignment.fragments.GameFragment
+import com.example.racing_assignment.R
+import com.example.racing_assignment.fragments.RecordsFragment
 import com.example.racing_assignment.databinding.ActivityMenuBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 
 class MenuActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMenuBinding

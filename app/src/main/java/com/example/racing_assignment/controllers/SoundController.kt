@@ -1,7 +1,8 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.controllers
 
 import android.content.Context
 import android.media.SoundPool
+import com.example.racing_assignment.R
 
 class SoundController(context: Context) {
 

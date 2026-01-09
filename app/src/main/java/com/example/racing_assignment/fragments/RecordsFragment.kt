@@ -1,4 +1,4 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.racing_assignment.R
 import com.example.racing_assignment.databinding.FragmentRecordsBinding
 
 class RecordsFragment : Fragment() {

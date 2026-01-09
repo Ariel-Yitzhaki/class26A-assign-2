@@ -1,24 +1,33 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.os.Handler
-import android.os.Looper
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.example.racing_assignment.controllers.CarController
+import com.example.racing_assignment.managers.GameManager
+import com.example.racing_assignment.controllers.LivesController
+import com.example.racing_assignment.controllers.LocationController
+import com.example.racing_assignment.utils.ObjectAnimator
+import com.example.racing_assignment.R
+import com.example.racing_assignment.managers.ScoreManager
+import com.example.racing_assignment.controllers.SensorController
+import com.example.racing_assignment.controllers.SoundController
+import com.example.racing_assignment.controllers.VibrationController
 
 class GameFragment : Fragment(), SensorController.SensorCallback {
 
     private val handler = Handler(Looper.getMainLooper())
     private var canMove = true
     private var useButtons = true
-
     private lateinit var scoreText: TextView
     private lateinit var carController: CarController
     private lateinit var livesController: LivesController

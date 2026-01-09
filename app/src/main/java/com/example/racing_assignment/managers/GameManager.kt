@@ -1,4 +1,4 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.managers
 
 class GameManager(
     private val onScoreChanged: (Int) -> Unit,

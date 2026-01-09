@@ -1,4 +1,4 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.utils
 
 import android.os.Handler
 import android.os.Looper

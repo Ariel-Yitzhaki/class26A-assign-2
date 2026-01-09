@@ -1,4 +1,4 @@
-package com.example.racing_assignment
+package com.example.racing_assignment.managers
 
 import android.content.Context
 import androidx.core.content.edit
